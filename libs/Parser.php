@@ -180,6 +180,15 @@ class Parser
 	{
 		dibi::insert("logs", array('datetime' => date("Y-d-m H:i:s"), 'type' => $type, 'message' => $message))->execute();
 		if (self::$debug)
+		{
 			echo date("Y-d-m H:i:s.") . substr((microtime(TRUE)-time())."", 2, 4) . " @ " . $type . " # " . $message . "\n";
+			if (!defined('STDIN')) //Next code is realy FUCKING hack
+			{
+				@ob_end_flush(); 
+		    @ob_flush(); 
+		    @flush(); 
+		    @ob_start();
+		  }
+		}
 	}
 }
