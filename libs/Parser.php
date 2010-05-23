@@ -236,10 +236,12 @@ class Parser
 		if(self::$parsedDays > self::$totalDays)
 			return;
 		if(empty(self::$progressTime))
-			self::$progressTime=time();
-		$now = time();
+			self::$progressTime=microtime(TRUE);
 
-		$perc=(double)(self::$parsedDays/self::$totalDays);
+		if ($doneLines < $totalLines)
+			$perc=(double)((self::$parsedDays-1+((double)($doneLines/$totalLines)))/self::$totalDays);
+		else
+			$perc=(double)(self::$parsedDays/self::$totalDays);
 
 		$bar=floor($perc*$size);
 
@@ -254,14 +256,14 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="] $disp%  ".str_pad(self::$parsedDays, 3, 0, STR_PAD_LEFT)."/".self::$totalDays;
+		$status_bar.="] $disp%  ".str_pad(self::$parsedDays, 3, 0, STR_PAD_LEFT)."/".str_pad(self::$totalDays, 3, 0, STR_PAD_LEFT);
 
 		/***************************** lines ******************************/
 		$perc=(double)($doneLines/$totalLines);
 
 		$bar=floor($perc*$size);
 
-		$status_bar.="\t[";
+		$status_bar.=" [";
 		$status_bar.=str_repeat("=", $bar);
 		if($bar<$size){
 			$status_bar.=">";
@@ -272,16 +274,16 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="]$disp% ".str_pad($doneLines, 5, 0, STR_PAD_LEFT)."/$totalLines\t";
+		$status_bar.="]$disp% ".str_pad($doneLines, 5, 0, STR_PAD_LEFT)."/".str_pad($totalLines, 5, 0, STR_PAD_LEFT)." ";
 		/*******************************************************************/
 
-		$rate = ($now-self::$progressTime)/self::$parsedDays;
+		$rate = (microtime(TRUE)-self::$progressTime)/self::$parsedDays;
 		$left = self::$totalDays - self::$parsedDays;
 		$eta = round($rate * $left, 2);
 
-		$elapsed = $now - self::$progressTime;
+		$elapsed = time() - self::$progressTime;
 
-		$status_bar.= " R:".number_format($eta)."s E:".number_format($elapsed)."s";
+		$status_bar.= " R:".$eta."s E:".(int)$elapsed."s";
 
 		echo "$status_bar  ";
 
