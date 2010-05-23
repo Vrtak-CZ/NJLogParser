@@ -35,13 +35,21 @@ if (!defined('STDIN'))
 }
 
 Parser::$originalDataDir = __DIR__."/data";
-Parser::$debug = TRUE;
+//Parser::$debug = TRUE;
 
 if (($date = Nette\Environment::getHttpRequest()->getQuery('date', NULL)) || ($date = isset($argv[1])  ? $argv[1] : NULL))
 	Parser::parseDate($date, TRUE);
 else
-	Parser::parse(10);
+	Parser::parse(20);
 echo "\n\n";
-echo "Total Time: ".round(Nette\Debug::timer()*1000, 2)."ms\n";
+
+$sec = $time = Nette\Debug::timer();
+$hours = (int)($sec/3600);
+$sec -= $hours*3600;
+$mins = (int)($sec/60);
+$sec -= $mins*60;
+$sec = (int)$sec;
+echo "Total Time: ".round($time*1000, 2)."ms ".str_pad($hours, 2, 0, STR_PAD_LEFT).":".str_pad($mins, 2, 0, STR_PAD_LEFT)
+	.":".str_pad($sec, 2, 0, STR_PAD_LEFT).".".round(($time-$sec)*1000)."\n";
 echo "Memory: ".round(memory_get_usage()/1024, 2)."KB (Real Memory: ".round(memory_get_usage(TRUE)/1024, 2)."KB)\n";
-echo "SQL Queries: ".dibi::$numOfQueries." SQL Time: ".round(dibi::$totalTime*1000, 2)."ms";
+echo "SQL Queries: ".dibi::$numOfQueries." SQL Time: ".round(dibi::$totalTime*1000, 2)."ms\n\n\n\r";
