@@ -158,7 +158,7 @@ class Parser
 			else
 				self::log('unknow', $line);
 
-			if (!self::$debug)
+			if (defined('STDIN') && !self::$debug)
 				self::progressBar($i, count($data));
 			$i++;
 		}
@@ -256,7 +256,7 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="] $disp%  ".str_pad(self::$parsedDays, 3, 0, STR_PAD_LEFT)."/".str_pad(self::$totalDays, 3, 0, STR_PAD_LEFT);
+		$status_bar.="]".str_pad($disp, 3, ' ', STR_PAD_LEFT)."%  ".str_pad(self::$parsedDays, 3, 0, STR_PAD_LEFT)."/".str_pad(self::$totalDays, 3, 0, STR_PAD_LEFT);
 
 		/***************************** lines ******************************/
 		$perc=(double)($doneLines/$totalLines);
@@ -274,7 +274,7 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="]$disp% ".str_pad($doneLines, 5, 0, STR_PAD_LEFT)."/".str_pad($totalLines, 5, 0, STR_PAD_LEFT)." ";
+		$status_bar.="]".str_pad($disp, 3, ' ', STR_PAD_LEFT)."% ".str_pad($doneLines, 5, 0, STR_PAD_LEFT)."/".str_pad($totalLines, 5, 0, STR_PAD_LEFT)." ";
 		/*******************************************************************/
 
 		$rate = (microtime(TRUE)-self::$progressTime)/self::$parsedDays;
