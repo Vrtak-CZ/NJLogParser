@@ -109,7 +109,6 @@ class Parser
 		elseif (file_exists(self::$originalDataDir."/".$date.".html"))
 				$data = file_get_contents(self::$originalDataDir."/".$date.".html");
 
-		echo "###".strlen($data);
 		self::log("load-data-end", $date);
 		return $data;
 	}
