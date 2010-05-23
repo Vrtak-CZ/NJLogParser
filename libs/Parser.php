@@ -254,7 +254,7 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="] $disp%  ".self::$parsedDays."/".self::$totalDays;
+		$status_bar.="] $disp%  ".str_pad(self::$parsedDays, 3, 0, STR_PAD_LEFT)."/".self::$totalDays;
 
 		/***************************** lines ******************************/
 		$perc=(double)($doneLines/$totalLines);
@@ -272,7 +272,7 @@ class Parser
 
 		$disp=number_format($perc*100, 0);
 
-		$status_bar.="]$disp% $doneLines/$totalLines\t";
+		$status_bar.="]$disp% ".str_pad($doneLines, 5, 0, STR_PAD_LEFT)."/$totalLines\t";
 		/*******************************************************************/
 
 		$rate = ($now-self::$progressTime)/self::$parsedDays;
