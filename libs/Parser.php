@@ -19,12 +19,12 @@ use DateInterval;
  * Parser
  *
  * @author     Patrik Votoček
- * @copyright  Copyright (c) 2010 Patrik VotoÄŤek
+ * @copyright  Copyright (c) 2010 Patrik Votoček
  * @package    NJLogParser
  */
 class Parser
 {
-	const VERSION = "1.0";
+	const VERSION = "1.1";
 
 	/** @var string */
 	public static $originalDataDir;
@@ -137,7 +137,9 @@ class Parser
 			elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"msc\"\>(.+) has set the subject to: (.*)\<\/font\>/i", $line, $matches) === 1)
 				self::add($date." ".$matches[1], $matches[2], "subject", $matches[3], $matches[4]);
 			elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mnc\"\>(.+) is now known as (.*)\<\/font\>/i", $line, $matches) === 1)
-			self::add($date." ".$matches[1], $matches[2], "rename", $matches[3], $matches[4]);
+				self::add($date." ".$matches[1], $matches[2], "rename", $matches[3], $matches[4]);
+			elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+class=\"ts\"\>(.+) has been kicked: (.*)/i", $line, $matches) === 1)
+				self::add($date." ".$matches[1], $matches[2], "kick", $matches[3], $matches[4]);
 			elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mne\"\>([^ ]+) (.*)\<\/font\>/i", $line, $matches) === 1)
 				self::add($date." ".$matches[1], $matches[2], "status", $matches[3], $matches[4]);
 			else
