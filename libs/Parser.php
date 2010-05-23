@@ -32,6 +32,12 @@ class Parser
 	public static $startDate = "2009-05-12";
 	/** @var bool */
 	public static $debug = FALSE;
+	/** @var int */
+	private static $totalDays = NULL;
+	/** @var int */
+	private static $parsedDays = 0;
+	/** @var int */
+	private static $progressTime = NULL;
 
 
 	/**
@@ -43,10 +49,14 @@ class Parser
 	{
 		$date = new DateTime(self::$startDate);
 		$myDate = new DateTime();
+		if (empty($dayLimit))
+			self::$totalDays = (int)(($myDate->getTimestamp()-$date->getTimestamp())/86400)+1;
+		else
+			self::$totalDays = $dayLimit;
 		$myDate->sub(new DateInterval("P2D"));
-		$i = 1;
+		self::$parsedDays = 1;
 		do {
-			if ($dayLimit !== NULL && $dayLimit < $i)
+			if ($dayLimit !== NULL && self::$totalDays < self::$parsedDays)
 				break;
 
 			dibi::begin();
@@ -54,8 +64,10 @@ class Parser
 			{
 				self::parseDate($date->format("Y-m-d"));
 				dibi::insert('parsed', array('date' => $date->format("Y-m-d")))->execute();
-				$i++;
+				self::$parsedDays++;
 			}
+			elseif ($dayLimit === NULL)
+				self::$parsedDays++;
 			dibi::commit();
 		} while ($date->add(new \DateInterval('P1D'))->getTimestamp() < time());
 	}
@@ -126,6 +138,7 @@ class Parser
 		$data = substr($data, 0, strpos($data, '<div class="legend">') - 1);
 		$data = explode("<br/>\n<a id", $data);
 
+		$i = 1;
 		foreach ($data as $line)
 		{
 			if (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mj\"\>(.+) joins the room.+/i", $line, $matches) === 1)
@@ -144,6 +157,10 @@ class Parser
 				self::add($date." ".$matches[1], $matches[2], "status", $matches[3], $matches[4]);
 			else
 				self::log('unknow', $line);
+
+			if (!self::$debug)
+				self::progressBar($i, count($data));
+			$i++;
 		}
 		self::log("parse-data-end", $date);
 	}
@@ -191,5 +208,87 @@ class Parser
 		    @ob_start();
 		  }
 		}
+	}
+
+
+	/**
+	 * show a status bar in the console
+	 *
+	 * <code>
+	 * for($x=1;$x<=100;$x++){
+	 *
+	 *     show_status($x, 100);
+	 *
+	 *     usleep(100000);
+	 *
+	 * }
+	 * </code>
+	 *
+	 * @author dealnews.com, Inc.
+	 * @copyright Copyright (c) 2010, dealnews.com, Inc.
+	 * @param int $doneLines how many items are completed
+	 * @param int $totalLines how many items are to be done total
+	 * @param int $size optional size of the status bar
+	 * @return void
+	 */
+	private static function progressBar($doneLines, $totalLines, $size=10)
+	{
+		if(self::$parsedDays > self::$totalDays)
+			return;
+		if(empty(self::$progressTime))
+			self::$progressTime=time();
+		$now = time();
+
+		$perc=(double)(self::$parsedDays/self::$totalDays);
+
+		$bar=floor($perc*$size);
+
+		$status_bar="\r[";
+		$status_bar.=str_repeat("=", $bar);
+		if($bar<$size){
+			$status_bar.=">";
+			$status_bar.=str_repeat(" ", $size-$bar);
+		} else {
+			$status_bar.="=";
+		}
+
+		$disp=number_format($perc*100, 0);
+
+		$status_bar.="] $disp%  ".self::$parsedDays."/".self::$totalDays;
+
+		/***************************** lines ******************************/
+		$perc=(double)($doneLines/$totalLines);
+
+		$bar=floor($perc*$size);
+
+		$status_bar.="\t[";
+		$status_bar.=str_repeat("=", $bar);
+		if($bar<$size){
+			$status_bar.=">";
+			$status_bar.=str_repeat(" ", $size-$bar);
+		} else {
+			$status_bar.="=";
+		}
+
+		$disp=number_format($perc*100, 0);
+
+		$status_bar.="]$disp% $doneLines/$totalLines\t";
+		/*******************************************************************/
+
+		$rate = ($now-self::$progressTime)/self::$parsedDays;
+		$left = self::$totalDays - self::$parsedDays;
+		$eta = round($rate * $left, 2);
+
+		$elapsed = $now - self::$progressTime;
+
+		$status_bar.= " R:".number_format($eta)."s E:".number_format($elapsed)."s";
+
+		echo "$status_bar  ";
+
+		@flush();
+
+		// when done, send a newline
+		if(self::$parsedDays == self::$totalDays && $doneLines == $totalLines)
+			echo "\n";
 	}
 }
