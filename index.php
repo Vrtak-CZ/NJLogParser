@@ -46,7 +46,7 @@ if (!defined('STDIN'))
 }
 
 Parser::$originalDataDir = __DIR__."/data";
-Parser::$debug = TRUE;
+//Parser::$debug = TRUE;
 
 if (($date = Nette\Environment::getHttpRequest()->getQuery('date', NULL)) || ($date = isset($argv[1])  ? $argv[1] : NULL))
 	Parser::parseDate($date, TRUE);
