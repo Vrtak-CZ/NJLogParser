@@ -48,19 +48,22 @@ class Parser
 	public static function parse($dayLimit = NULL)
 	{
 		$date = new DateTime(self::$startDate);
-		$myDate = new DateTime();
 		if (empty($dayLimit))
-			self::$totalDays = (int)(($myDate->getTimestamp()-$date->getTimestamp())/86400)+1;
+			self::$totalDays = (int)((time()-$date->getTimestamp())/86400)+1;
 		else
 			self::$totalDays = $dayLimit;
-		$myDate->sub(new DateInterval("P2D"));
+		
+		$myDate = new DateTime();
+		$parsetime = $myDate->sub(new DateInterval("P2D"))->getTimestamp();
+		unset($myDate);
+		
 		self::$parsedDays = 1;
 		do {
 			if ($dayLimit !== NULL && self::$totalDays < self::$parsedDays)
 				break;
 
 			dibi::begin();
-			if (dibi::select('id')->from('parsed')->where("[date] = %d", $date->format("Y-m-d"))->fetchSingle() === FALSE || $date->getTimestamp() > $myDate->getTimestamp())
+			if (dibi::select('id')->from('parsed')->where("[date] = %d", $date->format("Y-m-d"))->fetchSingle() === FALSE || $date->getTimestamp() > $parsetime)
 			{
 				self::parseDate($date->format("Y-m-d"));
 				dibi::insert('parsed', array('date' => $date->format("Y-m-d")))->execute();
@@ -69,7 +72,7 @@ class Parser
 			elseif ($dayLimit === NULL)
 				self::$parsedDays++;
 			dibi::commit();
-		} while ($date->add(new \DateInterval('P1D'))->getTimestamp() < time());
+		} while ($date->add(new DateInterval('P1D'))->getTimestamp() < time());
 	}
 
 	/**
@@ -196,10 +199,10 @@ class Parser
 	 */
 	private static function log($type, $message = NULL)
 	{
-		dibi::insert("logs", array('datetime' => date("Y-d-m H:i:s"), 'type' => $type, 'message' => $message))->execute();
+		dibi::insert("logs", array('datetime' => date("Y-m-d H:i:s"), 'type' => $type, 'message' => $message))->execute();
 		if (self::$debug)
 		{
-			echo date("Y-d-m H:i:s.") . substr((microtime(TRUE)-time())."", 2, 4) . " @ " . $type . " # " . $message . "\n";
+			echo date("Y-m-d H:i:s.") . substr((microtime(TRUE)-time())."", 2, 4) . " @ " . $type . " # " . $message . "\n";
 			if (!defined('STDIN')) //Next code is realy FUCKING hack
 			{
 				@ob_end_flush(); 

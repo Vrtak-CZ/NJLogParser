@@ -17,7 +17,8 @@ $loader->register();
 if (file_exists(__DIR__."/db.sqlite"))
 	copy(__DIR__."/db.sqlite", __DIR__."/backup/".date("Y-m-d_H-i-s-").substr(microtime(TRUE)-time(), 2, 4).".sqlite");
 
-dibi::connect(array(
+/************************************ SQLite *************************************/
+/*dibi::connect(array(
 	'driver' => "sqlite3",
 	'database' => __DIR__."/db.sqlite",
 	'formatDateTime' => "'Y-m-d H:i:s'",
@@ -25,8 +26,18 @@ dibi::connect(array(
 	'lazy' => TRUE,
 	'profiler' => TRUE
 ));
-
-dibi::loadFile(__DIR__."/db.structure.sql");
+dibi::loadFile(__DIR__."/db.structure.sqlite.sql");*/
+/************************************ MySQL *************************************/
+dibi::connect(array(
+	'driver' => "mysql",
+	'host' => "localhost",
+	'database' => "nettejabber",
+	'username' => "nettejabber",
+	'password' => "nettejabber",
+	'lazy' => TRUE,
+	'profiler' => TRUE
+));
+dibi::loadFile(__DIR__."/db.structure.mysql.sql");
 
 if (!defined('STDIN'))
 {
@@ -35,12 +46,12 @@ if (!defined('STDIN'))
 }
 
 Parser::$originalDataDir = __DIR__."/data";
-//Parser::$debug = TRUE;
+Parser::$debug = TRUE;
 
 if (($date = Nette\Environment::getHttpRequest()->getQuery('date', NULL)) || ($date = isset($argv[1])  ? $argv[1] : NULL))
 	Parser::parseDate($date, TRUE);
 else
-	Parser::parse(20);
+	Parser::parse(10);
 echo "\n\n";
 
 $sec = $time = Nette\Debug::timer();
