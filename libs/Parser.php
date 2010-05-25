@@ -24,7 +24,7 @@ use DateInterval;
  */
 class Parser
 {
-	const VERSION = "1.1";
+	const VERSION = "1.2";
 
 	/** @var string */
 	public static $originalDataDir;
@@ -59,8 +59,16 @@ class Parser
 		
 		self::$parsedDays = 1;
 		do {
-			if ($dayLimit !== NULL && self::$totalDays < self::$parsedDays)
+			if (($dayLimit !== NULL && self::$totalDays < self::$parsedDays) || $date->getTimestamp() > time())
 				break;
+			if (!defined('STDIN') && !self::$debug)//Next code is realy FUCKING hack
+			{
+				echo $date->format("Y-m-d") . "<br>\n";
+				@ob_end_flush(); 
+		    @ob_flush(); 
+		    @flush(); 
+		    @ob_start();
+		  }
 
 			dibi::begin();
 			if (dibi::select('id')->from('parsed')->where("[date] = %d", $date->format("Y-m-d"))->fetchSingle() === FALSE || $date->getTimestamp() > $parsetime)

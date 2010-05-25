@@ -14,11 +14,10 @@ $loader = new Nette\Loaders\RobotLoader();
 $loader->addDirectory(__DIR__."/libs");
 $loader->register();
 
-if (file_exists(__DIR__."/db.sqlite"))
-	copy(__DIR__."/db.sqlite", __DIR__."/backup/".date("Y-m-d_H-i-s-").substr(microtime(TRUE)-time(), 2, 4).".sqlite");
-
 /************************************ SQLite *************************************/
-/*dibi::connect(array(
+/*if (file_exists(__DIR__."/db.sqlite"))
+	copy(__DIR__."/db.sqlite", __DIR__."/backup/".date("Y-m-d_H-i-s-").substr(microtime(TRUE)-time(), 2, 4).".sqlite");
+dibi::connect(array(
 	'driver' => "sqlite3",
 	'database' => __DIR__."/db.sqlite",
 	'formatDateTime' => "'Y-m-d H:i:s'",
