@@ -61,11 +61,11 @@ class Parser
 			$this->totalDays = (int)((time()-$date->getTimestamp())/86400)+1;
 		else
 			$this->totalDays = $dayLimit;
-		
+
 		$myDate = new DateTime();
 		$parsetime = $myDate->sub(new DateInterval("P2D"))->getTimestamp();
 		unset($myDate);
-		
+
 		$this->parsedDays = 1;
 		do {
 			if (($dayLimit !== NULL && $this->totalDays < $this->parsedDays) || $date->getTimestamp() > time()) {
@@ -73,9 +73,9 @@ class Parser
 			}
 			if (!defined('STDIN') && !$this->debug) { //Next code is realy FUCKING hack
 				echo $date->format("Y-m-d") . "<br>\n";
-				@ob_end_flush(); 
-			    @ob_flush(); 
-			    @flush(); 
+				@ob_end_flush();
+			    @ob_flush();
+			    @flush();
 			    @ob_start();
 		  	}
 
@@ -88,7 +88,7 @@ class Parser
 			} elseif ($dayLimit === NULL) {
 				$this->parsedDays++;
 			}
-			
+
 			$this->connection->commit();
 		} while ($date->add(new DateInterval('P1D'))->getTimestamp() < time());
 	}
@@ -171,7 +171,7 @@ class Parser
 				$this->add($date." ".$matches[1], $matches[2], "subject", $matches[3], $matches[4]);
 			} elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mnc\"\>(.+) is now known as (.*)\<\/font\>/i", $line, $matches) === 1) {
 				$this->add($date." ".$matches[1], $matches[2], "rename", $matches[3], $matches[4]);
-			} elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+class=\"ts\"\>(.+) has been kicked: (.*)/i", $line, $matches) === 1) {
+			} elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mk\"\>(.+) has been kicked: (.*)\<\/font\>/i", $line, $matches) === 1) {
 				$this->add($date." ".$matches[1], $matches[2], "kick", $matches[3], $matches[4]);
 			} elseif (preg_match("/.+name=\"([0-9:]+)\.([0-9]+)\".+\<font class=\"mne\"\>([^ ]+) (.*)\<\/font\>/i", $line, $matches) === 1) {
 				$this->add($date." ".$matches[1], $matches[2], "status", $matches[3], $matches[4]);
@@ -201,17 +201,17 @@ class Parser
 		$selection = $this->connection->table('data');
 		if ($selection->where("datetime = ? AND ms = ?", $datetime, $ms)->count('*') > 0) {
 			$selection->update(array(
-				'type' => $type, 
-				'name' => $name, 
+				'type' => $type,
+				'name' => $name,
 				'data' => $data
 			))->where("datetime = ? AND ms = ?", $datetime, $ms);
 			$this->log("update", $datetime . "#" . $type);
 		} else {
 			$selection->insert(array(
-				'datetime' => $datetime, 
-				'ms' => $ms, 
-				'type' => $type, 
-				'name' => $name, 
+				'datetime' => $datetime,
+				'ms' => $ms,
+				'type' => $type,
+				'name' => $name,
 				'data' => $data)
 			);
 			$this->log("add", $datetime . "#" . $type);
@@ -228,16 +228,16 @@ class Parser
 	{
 		$selection = $this->connection->table('logs');
 		$selection->insert(array(
-			'datetime' => date("Y-m-d H:i:s"), 
-			'type' => $type, 
+			'datetime' => date("Y-m-d H:i:s"),
+			'type' => $type,
 			'message' => $message,
 		));
 		if ($this->debug) {
 			echo date("Y-m-d H:i:s.") . substr((microtime(TRUE)-time())."", 2, 4) . " @ " . $type . " # " . $message . "\n";
 			if (!defined('STDIN')) { //Next code is realy FUCKING hack
-				@ob_end_flush(); 
-				@ob_flush(); 
-				@flush(); 
+				@ob_end_flush();
+				@ob_flush();
+				@flush();
 				@ob_start();
 			}
 		}
